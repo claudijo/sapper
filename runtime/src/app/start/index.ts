@@ -104,13 +104,33 @@ function handle_click(event: MouseEvent) {
 	}
 }
 
+let getString = (function() {
+	var DIV = document.createElement("div");
+
+	if ('outerHTML' in DIV)
+		return function(node) {
+			return node.outerHTML;
+		};
+
+	return function(node) {
+		var div = DIV.cloneNode();
+		div.appendChild(node.cloneNode(true));
+		return div.innerHTML;
+	};
+
+})();
+
 function which(event: MouseEvent) {
 	return event.which === null ? event.button : event.which;
 }
 
 function find_anchor(node: Node) {
-	while (node && node.nodeName.toUpperCase() !== 'A') node = node.parentNode; // SVG <a> elements have a lowercase name
-	return node;
+	try {
+		while (node && node.nodeName.toUpperCase() !== 'A') node = node.parentNode; // SVG <a> elements have a lowercase name
+		return node;
+	} catch(error) {
+		throw new Error('Original error ' + error.message + ' - Node info ' + getString(node));
+	}
 }
 
 function handle_popstate(event: PopStateEvent) {
